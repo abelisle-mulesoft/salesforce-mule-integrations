@@ -1,0 +1,55 @@
+#===================================================================================================
+# Mule application properties
+#===================================================================================================
+env:
+  name: "dev"
+
+#---------------------------------------------------------------------------------------------------
+# Mule Gateway API Autodiscovery
+#  autodiscovery:
+#   api_id:     ""
+#   flow_name:  ""
+
+#---------------------------------------------------------------------------------------------------
+# HTTP Listener on CloudHub
+http_listener:  # Comnmon to HTTP and HTTPS
+  host: "0.0.0.0"
+
+http:
+  port: "8081"
+https:
+  port: "8082"
+
+#---------------------------------------------------------------------------------------------------
+# REST API - Microsoft Identity Platform 
+ms_login:
+  host:       "login.microsoftonline.com"
+  port:       ""   # blank/use default port
+  protocol:   "HTTPS"
+  base_path:  "/${azure.tenant_id}/oauth2/v2.0/token"
+  scope:      "https://storage.azure.com/.default"
+  grant_type: "client_credentials"
+
+#---------------------------------------------------------------------------------------------------
+# REST API - Azure Storage
+azure:
+  host:           "${azure.storage.account}.blob.core.windows.net"
+  port:           ""   # blank/use default port
+  protocol:       "HTTPS"
+  base_path:      "/"
+  tenant_id:      ""
+  client_id:      ""
+  client_secret:  ""
+  storage:
+    account:      ""
+    container:    ""
+  ms_version:     "2021-12-02"
+
+#---------------------------------------------------------------------------------------------------
+# Salesforce Marketing Cloud Connector
+sfmc:
+  username:       ""
+  password:       ""
+  service_url:    ""
+  external_key:
+    web_contact:  ""

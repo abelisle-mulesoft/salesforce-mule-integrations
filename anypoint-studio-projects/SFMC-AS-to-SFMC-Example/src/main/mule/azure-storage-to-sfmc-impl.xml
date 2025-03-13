@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sfdc-marketing-cloud="http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud/current/mule-sfdc-marketing-cloud.xsd">
+	<flow name="azure-storage-to-sfmc-impl-flow" doc:id="d8227898-f5da-4a14-ade6-5098a4c5fd94" >
+		<logger level="TRACE" doc:name="Trace - Flow Starting" doc:id="75223530-4330-414f-9cbc-8991ef28a316" message="Flow starting"/>
+		<set-variable value="#[attributes.queryParams.blobName]" doc:name="blobName" doc:id="dbc79289-80da-4445-8042-44654d22d93d" variableName="blobName"/>
+		<flow-ref doc:name="get-azure-oauth2-token-flow" doc:id="3af97286-f440-4244-90cb-a580d8fc56d1" name="get-azure-oauth2-token-flow"/>
+		<http:request method="GET" doc:name="Get blob" doc:id="abb2fe43-8118-4f87-85aa-74824a88c7a2" config-ref="Azure_Storage_HTTP_Request_Config" path='#["/${azure.storage.container}/$(vars.blobName)"]' sendBodyMode="NEVER" outputMimeType="application/csv; header=true">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.oauthToken,
+	"x-ms-version" : p('azure.ms_version')
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="CSV to SFMC Format" doc:id="8bc6fd55-3b3f-40b2-8116-068d0c40caf4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01, indexOfPayload01 ) -> {
+	CustomerKey: p('sfmc.external_key.web_contact'),
+	Properties: {
+		Property: [{
+			Name: "ContactId",
+			Value: payload01.contactId
+		},{
+			Name: "FirstName",
+			Value: payload01.firstName
+		},{
+			Name: "LastName",
+			Value: payload01.lastName
+		},{
+			Name: "Company",
+			Value: payload01.company
+		},{
+			Name: "JobTitle",
+			Value: payload01.jobTitle
+		},{
+			Name: "Phone",
+			Value: payload01.workPhone
+		},{
+			Name: "Email",
+			Value: payload01.email
+		}]
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<sfdc-marketing-cloud:create objectType="DataExtensionObject" doc:name="WebContacts" doc:id="9ac9742d-dc3f-48f1-af24-6f45c57c2518" config-ref="Salesforce_Marketing_Cloud_Config"/>
+		<ee:transform doc:name="Set Response Body" doc:id="724da4d3-0c18-495f-ab6b-8c112ef32d1a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"Created WebContacts in Marketing Cloud successfully"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="TRACE" doc:name="Trace - Flow Ending" doc:id="9fed625e-9684-4dd7-92e9-3a56c2604a45" message="Flow ending" />
+	</flow>
+</mule>

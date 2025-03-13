@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="get-azure-oauth2-token-flow" doc:id="ece650fe-8b43-4d70-8c9d-2829ccafa66a" >
+		<logger level="TRACE" doc:name="Trace - Flow Starting" doc:id="9bfc48b1-2f43-425e-9170-8a809715e7de" message="Flow starting" />
+		<logger level="TRACE" doc:name="Trace - Creating Microsoft Login Request" doc:id="732cc57c-8bbd-4265-8dea-31490548518b" message="Creating Microsoft login request"/>
+		<ee:transform doc:name="Create Microsoft Login Request" doc:id="16220c96-5710-4578-ad7e-7bd6e333c94e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/x-www-form-urlencoded
+---
+{
+	client_id:     p('azure.client_id'),
+	client_secret: p('azure.client_secret'),
+	scope:         p('ms_login.scope'),
+	grant_type:    p('ms_login.grant_type')
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="TRACE" doc:name="Trace - Getting OAuth2 Token" doc:id="57555574-5cbc-461f-abad-779b02573bf9" message="Getting OAuth2 token using Microsoft login"/>
+		<http:request method="POST" doc:name="Get OAuth2 token using Microsoft Login" doc:id="ebccb093-6c82-44dd-aaf0-27c938b5624e" config-ref="MS_Login_HTTP_Request_Config" path="/"/>
+		<set-variable value="#[payload.access_token]" doc:name="oauthToken" doc:id="4981eaf6-0a7f-4972-a914-e937dd6afbb4" variableName="oauthToken" mimeType="application/json" />
+		<logger level="TRACE" doc:name="Trace - Successfully Got Token" doc:id="1a9cca3b-8dac-4e83-883e-9ab3ee9da792" message="Successfully got OAuth2 token" />
+		<logger level="TRACE" doc:name="Trace - Flow Ending" doc:id="5334c48d-08db-4030-bcfc-144b00db9efd" message="Flow ending" />
+	</flow>
+</mule>

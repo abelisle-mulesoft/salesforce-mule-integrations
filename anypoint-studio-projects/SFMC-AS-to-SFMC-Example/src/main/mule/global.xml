@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:sfdc-marketing-cloud="http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud/current/mule-sfdc-marketing-cloud.xsd">
+	<global-property doc:name="Global Property" doc:id="562fbb6e-029c-4be9-9116-53348358dac7" name="env" value="dev" />
+	<configuration-properties doc:name="Configuration properties" doc:id="afd60f34-f242-4a81-8b9d-e8445f07a062" file="properties/mule-props-${env}.yaml" />
+    <http:listener-config name="azure-storage-to-sfmc-httpListenerConfig">
+        <http:listener-connection host="${http_listener.host}" port="${http.port}"/>
+    </http:listener-config>
+	<http:request-config name="MS_Login_HTTP_Request_Config" doc:name="HTTP Request configuration" doc:id="f184ae85-b085-42ea-a6e8-6e1529d33b52" basePath="${ms_login.base_path}" >
+		<http:request-connection protocol="${ms_login.protocol}" host="${ms_login.host}" port="${ms_login.port}" usePersistentConnections="false" />
+	</http:request-config>
+		<http:request-config name="Azure_Storage_HTTP_Request_Config" doc:name="HTTP Request configuration" doc:id="782dfd55-80c2-492e-9b50-8faedae75896" basePath="${azure.base_path}" >
+	<http:request-connection protocol="${azure.protocol}" host="${azure.host}" port="${azure.port}" />
+	</http:request-config>
+	<sfdc-marketing-cloud:config name="Salesforce_Marketing_Cloud_Config" doc:name="Salesforce Marketing Cloud Config" doc:id="7c1a8ad3-7c30-4ec2-b99f-0e62fb8db2e8" >
+		<sfdc-marketing-cloud:basic-connection username="${sfmc.username}" password="${sfmc.password}" serviceUrl="${sfmc.service_url}" />
+	</sfdc-marketing-cloud:config>
+</mule>

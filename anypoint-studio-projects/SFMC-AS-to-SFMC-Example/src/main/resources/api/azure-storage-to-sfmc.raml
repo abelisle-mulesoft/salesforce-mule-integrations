@@ -1,0 +1,15 @@
+#%RAML 1.0
+title: Azure Storage to SFMC Example
+mediaType:
+  - application/json
+/contacts:
+  post:
+    displayName: Create contacts
+    description: Get contacts from Azure Storage blob and create them in Salesforce Marketing Cloud.
+    queryParameters:
+      blobName:
+        description: The name of the blob to retrieve from Azure Storage.
+        example: Web-Contact-01.csv
+        type: string
+    responses:
+      "201": {}
